@@ -41,17 +41,17 @@ int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 #define Rojo   0xF800
 #define Amarillo 0xFFE0
 //Donde se encontrarán nuestros botones para los jugadores
-const int P1UP = PD_7;
-const int P1DO= PF_4;
-const int P2UP= PA_3;
-const int P2DO= PA_4;
+const int UP1 = PD_7;
+const int DO1= PF_4;
+const int UP2= PA_3;
+const int DO2= PA_4;
 const int p1x=47;
-const int p1y= 110;
-const int p2x=210;
-const int p2y= 110;
+const int p2x=240;
+
 const int pa_alt=23;
 
-
+uint8_t p1y= 110;
+uint8_t p2y= 110;
 uint8_t pex=64;
 uint8_t pey=32;
 uint8_t coorx=1;
@@ -61,11 +61,6 @@ uint8_t newy;
 
 boolean reinicio=false;
 boolean juego=true;
-static bool P1UP_state=false;
-static bool P1DO_state=false;
-static bool P2UP_state=false;
-static bool P2DO_state=false;
-
 
 unsigned long peupdate;
 unsigned long paupdate;
@@ -93,10 +88,10 @@ void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int 
 // Inicialización
 //***************************************************************************************************************************************
 void setup() {
-  pinMode(P1UP, INPUT);
-  pinMode(P1DO, INPUT);
-  pinMode(P2UP, INPUT);
-  pinMode(P2DO, INPUT);
+  pinMode(UP1, INPUT);
+  pinMode(DO1, INPUT);
+  pinMode(UP2, INPUT);
+  pinMode(DO2, INPUT);
   SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
   Serial.begin(9600);
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
@@ -122,6 +117,11 @@ void setup() {
     LCD_Bitmap(x, 223, 16, 16, tile);
     x += 15;
  }
+    unsigned long start= millis();
+    while(millis()-start<2000);
+    peupdate=millis();
+    paupdate=peupdate;
+     
     pex=random(120,125);
     pey=random(20,30);
   
@@ -130,10 +130,15 @@ void setup() {
 // Loop Infinito
 //***************************************************************************************************************************************
 void loop() {
-  P1UP_state = (digitalRead(P1UP)==LOW);
-  P1DO_state = (digitalRead(P1DO)==LOW);
-  P2UP_state= (digitalRead(P2UP)==LOW);
-  P2DO_state= (digitalRead(P2DO)==LOW);
+  unsigned long time= millis();
+  static bool UP1_state=false;
+  static bool DO1_state=false;
+  static bool UP2_state=false;
+  static bool DO2_state=false;
+  UP1_state |= (digitalRead(UP1)==LOW);
+  DO1_state |= (digitalRead(DO1)==LOW);
+  UP2_state |= (digitalRead(UP2)==LOW);
+  DO2_state |= (digitalRead(DO2)==LOW);
   
   if(reinicio){
     pex=random(120,125);
@@ -186,6 +191,47 @@ void loop() {
   pex=newx;
   pey=newy;
   peupdate += perate;
+
+
+  //Paletas 
+  if (time> paupdate && juego){
+    paupdate += parate;
+
+    //Jugador uno
+    V_line(p1x, p1y, pa_alt, Negro);
+    if(UP1_state){
+      p1y-=1;
+      }
+    if(DO1_state){
+      p1y-=1;
+      }  
+     UP1_state=DO1_state= false;
+     if (p1y<12) p1y=12;
+     if (p1y+pa_alt>218) p1y=218-pa_alt;
+     V_line(p1x, p1y, pa_alt, Negro);
+
+     
+    //Jugador dos
+    V_line(p2x, p2y, pa_alt, Negro);
+    if(UP2_state){
+      p2y-=1;
+      }
+    if(DO2_state){
+      p2y-=1;
+      }  
+     UP2_state=DO2_state= false;
+     if (p2y<12) p1y=12;
+     if (p2y+pa_alt>218) p2y=218-pa_alt;
+     V_line(p1x, p1y, pa_alt, Negro);
+
+     //Paletas
+    LCD_Bitmap(15, p1y,16,24,planta);
+    LCD_Sprite(290, p2y, 16, 24, mario, 1, 0, 1,0);
+    
+  
+     
+    }
+  
   for(int x = 0; x <320-32; x++){
     delay(15);
       
@@ -195,7 +241,6 @@ void loop() {
 
  }
   
-  //LCD_Bitmap(35, 35, pex, pey, planta);
 
   
   
