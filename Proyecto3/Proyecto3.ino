@@ -45,13 +45,14 @@ const int UP1 = PD_7;
 const int DO1= PF_4;
 const int UP2= PA_3;
 const int DO2= PA_2;
+
 const int p1x=47;
 const int p2x=240;
 
 const int pa_alt=23;
 
-int scorej1;
-int scorej2;
+int scorej1=0;
+int scorej2=0;
 
 uint8_t p1y= 110;
 uint8_t p2y= 110;
@@ -99,11 +100,10 @@ void setup() {
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
   Serial.println("Inicio");
   LCD_Init();
-  LCD_Clear(0x780F);
+  LCD_Clear(0x00);
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
   LCD_Print(text1, 70, 110, 2, 0xffff, Negro);
-
   delay(1000);
   FillRect(0, 0, 320, 240, 0x6400);
   String text2 = "MAYAN BALL!";
@@ -170,7 +170,7 @@ void loop() {
       //Show score
       }
   //Extremos horizontales 
-    if (newy== 10 || newy==230){
+    if (newy== 17 || newy==217){
       //Cambiamos de dirección
       coory=-coory;
       newy+=coory+coory;
@@ -182,11 +182,11 @@ void loop() {
     }
    //Jugador 2 le pegó (El de la derecha)
    if (newx=p2x  && newy>=p2y && newy<= p2y+ pa_alt){
-      coorx=-coorx;
-      newx+=coorx+coorx;
+      coorx = -coorx;
+      newx += coorx+coorx;
   }
 
-    FillRect(pex, pey, 8, 8, 0x00);
+    FillRect(pex, pey, 8, 8, 0x6400);
     FillRect(newx, newy, 8, 8, Amarillo);
     pex=newx;
     pey=newy;
