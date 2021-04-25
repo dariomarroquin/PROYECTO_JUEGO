@@ -46,8 +46,8 @@ const int DO1= PF_4;
 const int UP2= PA_3;
 const int DO2= PA_2;
 
-const int p1x=47;
-const int p2x=240;
+const int p1x=15;
+const int p2x=290;
 
 const int pa_alt=23;
 
@@ -185,12 +185,16 @@ void loop() {
       coorx = -coorx;
       newx += coorx+coorx;
   }
-
+    newx=pex+coorx;
+    newy=pey+coory;
     FillRect(pex, pey, 8, 8, 0x6400);
     FillRect(newx, newy, 8, 8, Amarillo);
+    
     pex=newx;
     pey=newy;
     peupdate += perate;
+
+
   }
 
   //Paletas 
@@ -198,7 +202,7 @@ void loop() {
     paupdate += parate;
   
     //Jugador uno
-    V_line(p1x, p1y, pa_alt, Negro);
+    V_line(p1x, p1y, pa_alt, 0x6400);
     if(UP1_state){
       p1y-=1;
       }
@@ -206,13 +210,13 @@ void loop() {
       p1y+=1;
       }  
      UP1_state=DO1_state= false;
-     if (p1y<12) p1y=12;
-     if (p1y+pa_alt>218) p1y=218-pa_alt;
-     V_line(p1x, p1y, pa_alt, Negro);
+     if (p1y<17) p1y=17;
+     if (p1y+pa_alt>220) p1y=220-pa_alt;
+     V_line(p1x, p1y, pa_alt, 0x6400);
 
      
     //Jugador dos
-    V_line(p2x, p2y, pa_alt, Negro);
+    V_line(p2x, p2y, pa_alt, 0x6400);
     if(UP2_state){
       p2y-=1;
       }
@@ -220,13 +224,13 @@ void loop() {
       p2y+=1;
       }  
      UP2_state=DO2_state= false;
-     if (p2y<12) p2y=12;
-     if (p2y+pa_alt>218) p2y=218-pa_alt;
-     V_line(p2x, p2y, pa_alt, Negro);
+     if (p2y<17) p2y=17;
+     if (p2y+pa_alt>220) p2y=220-pa_alt;
+     V_line(p2x, p2y, pa_alt, 0x6400);
 
      //Paletas
-    LCD_Bitmap(15, p1y,16,24,planta);
-    LCD_Sprite(290, p2y, 16, 24, planta, 1, 0, 1,0);
+    LCD_Bitmap(p1x, p1y,16,24,planta);
+    LCD_Sprite(p2x, p2y, 16, 24, planta, 1, 0, 1,0);
     
   
      
