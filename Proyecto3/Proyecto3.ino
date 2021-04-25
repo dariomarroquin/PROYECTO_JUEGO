@@ -44,7 +44,7 @@ int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 const int UP1 = PD_7;
 const int DO1= PF_4;
 const int UP2= PA_3;
-const int DO2= PA_4;
+const int DO2= PA_2;
 const int p1x=47;
 const int p2x=240;
 
@@ -235,7 +235,7 @@ void loop() {
   for(int x = 0; x <320-32; x++){
     delay(15);
       
-    int anim2 = (x/35)%2;
+   // int anim2 = (x/35)%2;
     int anim = (x/11)%8;
     int anim3 = (x/11)%4;
 
