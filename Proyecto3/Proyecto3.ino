@@ -46,6 +46,13 @@ const int DO1= PF_4;
 const int UP2= PA_3;
 const int DO2= PA_2;
 
+//-------------------------------------------------------------
+int end_to_start = 0;
+int start_btn;
+int x_s = 1;
+extern uint8_t inicio[];
+//-------------------------------------------------------------
+
 const int p1x=15;
 const int p2x=290;
 
@@ -84,6 +91,13 @@ void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsign
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
 
+
+//----------------------------------------------------------------------------
+//función para pantalla de inicio
+void start_screen(void);
+//----------------------------------------------------------------------------
+
+
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
@@ -101,6 +115,10 @@ void setup() {
   Serial.println("Inicio");
   LCD_Init();
   LCD_Clear(0x00);
+
+  start_screen(); //pantalla de inicio
+
+  
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
   LCD_Print(text1, 70, 110, 2, 0xffff, Negro);
@@ -240,6 +258,26 @@ void loop() {
 //***************************************************************************************************************************************
 // Funciones
 //***************************************************************************************************************************************
+//----------------------------------------------------------------------------------
+void start_screen(void){ //función de pantalla de inicio
+  digitalWrite(PC_6, HIGH); //pin para que suene la música de inicio del juego
+  while(end_to_start==0){
+    if(x_s==1){
+      LCD_Bitmap(0, 0, 320, 240, inicio);
+      
+    }
+    x_s = 0;
+    start_btn = digitalRead(PUSH1);
+    
+    if(start_btn == HIGH){ //aquí se lee el botón principal para ver si se inicia el juego o no
+      end_to_start = 1;
+      digitalWrite(PC_6, LOW); //se pone en LOW el pin de la música de inicio
+      setup();
+    }
+  }
+}
+//----------------------------------------------------------------------------------
+
 void GameOver(){
   juego =false; 
   LCD_Clear(0x00);
