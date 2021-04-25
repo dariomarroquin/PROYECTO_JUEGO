@@ -50,14 +50,16 @@ const int p2x=240;
 
 const int pa_alt=23;
 
+int scorej1;
+int scorej2;
+
 uint8_t p1y= 110;
 uint8_t p2y= 110;
 uint8_t pex=64;
 uint8_t pey=32;
 uint8_t coorx=1;
 uint8_t coory=1;
-uint8_t newx;
-uint8_t newy;
+
 
 boolean reinicio=false;
 boolean juego=true;
@@ -106,17 +108,13 @@ void setup() {
   FillRect(0, 0, 320, 240, 0x6400);
   String text2 = "MAYAN BALL!";
   LCD_Print(text2, 70, 110, 2, 0xffff, 0x6400);
-//LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
-    
-  //LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
-  
-  
   for(int x = 0; x <319; x++){
-    LCD_Bitmap(x, 1, 16, 16, tile);
-   
-    LCD_Bitmap(x, 223, 16, 16, tile);
-    x += 15;
- }
+      LCD_Bitmap(x, 1, 16, 16, tile);
+     
+      LCD_Bitmap(x, 223, 16, 16, tile);
+      x += 15;
+   }
+
     unsigned long start= millis();
     while(millis()-start<2000);
     peupdate=millis();
@@ -153,57 +151,59 @@ void loop() {
       while(coory==0);
       reinicio=false;
     }
- 
-  //Extremos verticales
-  if (newx ==10){  //Extremo izquierdo
-    //Punto para jugador 2
-    //Se le agrega uno al puntaje de jugador 2
-    //Música?
-    //Show score
+  if(time > peupdate && juego){
+    uint8_t newx=pex+coorx;
+    uint8_t newy=pey+coory;
     
+    //Extremos verticales
+    if (newx ==10){  //Extremo izquierdo
+      //Se le agrega uno al puntaje de jugador 2
+      scorej2++;
+      //Música?
+      //Show score
+      
+      }
+    if (newx ==246){ //Extremo derecho
+      //Se le agrega uno al puntaje de jugador 1
+      scorej1++;
+      //Música?
+      //Show score
+      }
+  //Extremos horizontales 
+    if (newy== 10 || newy==230){
+      //Cambiamos de dirección
+      coory=-coory;
+      newy+=coory+coory;
+      }
+   //Jugador 1 le pegó (El de la izquierda)
+   if (newx=p1x  && newy>=p1y && newy<= p1y+ pa_alt){
+      coorx=-coorx;
+      newx+=coorx+coorx;
     }
-  if (newx ==246){ //Extremo derecho
-     //Punto para jugador 2
-    //Se le agrega uno al puntaje de jugador 2
-    //Música?
-    //Show score
-    }
-//Extremos horizontales 
-  if (newy== 10 || newy==230){
-    //Cambiamos de dirección
-    coory=-coory;
-    newy+=coory+coory;
-    }
- //Jugador 1 le pegó (El de la izquierda)
- if (newx=p1x  && newy>=p1y && newy<= p1y+ pa_alt){
-    coorx=-coorx;
-    newx+=coorx+coorx;
+   //Jugador 2 le pegó (El de la derecha)
+   if (newx=p2x  && newy>=p2y && newy<= p2y+ pa_alt){
+      coorx=-coorx;
+      newx+=coorx+coorx;
   }
- //Jugador 2 le pegó (El de la derecha)
- if (newx=p2x  && newy>=p2y && newy<= p2y+ pa_alt){
-    coorx=-coorx;
-    newx+=coorx+coorx;
-  }
-  newx=pex+coorx;
-  newy=pey+coory;
-  FillRect(pex, pey, 8, 8, 0x00);
-  FillRect(newx, newy, 8, 8, Amarillo);
-  pex=newx;
-  pey=newy;
-  peupdate += perate;
 
+    FillRect(pex, pey, 8, 8, 0x00);
+    FillRect(newx, newy, 8, 8, Amarillo);
+    pex=newx;
+    pey=newy;
+    peupdate += perate;
+  }
 
   //Paletas 
   if (time> paupdate && juego){
     paupdate += parate;
-
+  
     //Jugador uno
     V_line(p1x, p1y, pa_alt, Negro);
     if(UP1_state){
       p1y-=1;
       }
     if(DO1_state){
-      p1y-=1;
+      p1y+=1;
       }  
      UP1_state=DO1_state= false;
      if (p1y<12) p1y=12;
@@ -217,43 +217,51 @@ void loop() {
       p2y-=1;
       }
     if(DO2_state){
-      p2y-=1;
+      p2y+=1;
       }  
      UP2_state=DO2_state= false;
-     if (p2y<12) p1y=12;
+     if (p2y<12) p2y=12;
      if (p2y+pa_alt>218) p2y=218-pa_alt;
-     V_line(p1x, p1y, pa_alt, Negro);
+     V_line(p2x, p2y, pa_alt, Negro);
 
      //Paletas
     LCD_Bitmap(15, p1y,16,24,planta);
-    LCD_Sprite(290, p2y, 16, 24, mario, 1, 0, 1,0);
+    LCD_Sprite(290, p2y, 16, 24, planta, 1, 0, 1,0);
     
   
      
     }
-  
-  for(int x = 0; x <320-32; x++){
-    delay(15);
-      
-   // int anim2 = (x/35)%2;
-    int anim = (x/11)%8;
-    int anim3 = (x/11)%4;
-
- }
-  
-
-  
-  
-
-  for(int x = 320-32; x >0; x--){
-    delay(5);
-    int anim = (x/11)%8;
-    int anim2 = (x/11)%2;
-
-
-  } 
 
 }
+//***************************************************************************************************************************************
+// Funciones
+//***************************************************************************************************************************************
+void GameOver(){
+  juego =false; 
+  LCD_Clear(0x00);
+  delay(100);
+  if(scorej1>scorej2){
+    String text4 = "¡El Jugador 1 es el ganador!";
+    LCD_Print(text4, 100, 100, 1, Azul, 0x00);
+    }
+  else{
+    String text5 = "¡El Jugador 2 es el ganador!";
+    LCD_Print(text5, 100, 100, 1, Azul, 0x00);
+    }
+
+  while (digitalRead(UP1)==LOW && digitalRead(DO1)==LOW && digitalRead(UP2)==LOW && digitalRead(DO2)==LOW){
+    delay(100);
+  }
+  juego= true;
+  scorej1=scorej2=0;
+  unsigned long start= millis();
+  while(millis()-start<2000);
+  peupdate=millis();
+  paupdate=peupdate;
+  juego= true;
+  reinicio= true;
+  
+  }
 //***************************************************************************************************************************************
 // Función para inicializar LCD
 //***************************************************************************************************************************************
