@@ -156,6 +156,7 @@ void loop() {
   DO2_state |= (digitalRead(DO2)==LOW);
   
   if(reinicio){
+    background();
     pex=random(120,125);
     pey=random(20,30);
     do{
@@ -317,6 +318,8 @@ void fin(){
     LCD_Print(text5, 100, 100, 1, 0xFFFF, 0x6400);
     LCD_Print(String(scorej1), 110, 115, 1, Blanco, Azul);
     LCD_Print(String(scorej2), 150, 115, 1, Blanco, Azul);
+    delay(1000);
+    LCD_Clear(0x00);
     while(millis()-start<2000);
     peupdate=millis();
     paupdate=peupdate;
