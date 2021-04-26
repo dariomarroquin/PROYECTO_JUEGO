@@ -53,8 +53,8 @@ int x_s = 1;
 extern uint8_t inicio[];
 //-------------------------------------------------------------
 
-const int p1x=17;
-const int p2x=290;
+const int p1x=35;
+const int p2x=250;
 
 const int pa_alt=23;
 
@@ -128,9 +128,13 @@ void setup() {
   
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
-  LCD_Print(text1, 70, 110, 2, 0xffff, Negro);
-  delay(1000);
-  background();
+  LCD_Print(text1, 60, 100, 2, 0xffff, Negro);
+  String text2 = "El primero que ";
+  LCD_Print(text2, 50, 130, 2, 0xffff, Negro);
+  String text3 = "llegue a 5 gana! ";
+  LCD_Print(text3, 30, 150, 2, 0xffff, Negro);
+  delay(2000);
+  backgroundjuego();
   
   unsigned long start= millis();
   while(millis()-start<2000);
@@ -156,7 +160,7 @@ void loop() {
   DO2_state |= (digitalRead(DO2)==LOW);
   
   if(reinicio){
-    background();
+    backgroundjuego();
     pex=random(120,125);
     pey=random(20,30);
     do{
@@ -187,7 +191,7 @@ void loop() {
       //Música?
       
       }
-    if (newx ==246){ //Extremo derecho
+    if (newx ==255){ //Extremo derecho
       //Se le agrega uno al puntaje de jugador 1
       scorej1++;
         if (scorej1==maxpuntos){
@@ -201,7 +205,7 @@ void loop() {
       
       }
   //Extremos horizontales 
-    if (newy== 17 || newy==217){
+    if (newy== 17 || newy==215){
       //Cambiamos de dirección
       coory=-coory;
       newy+=coory+coory;
@@ -218,7 +222,7 @@ void loop() {
   }
     newx=pex+coorx;
     newy=pey+coory;
-    FillRect(pex, pey, 8, 8, 0x6400);
+    FillRect(pex, pey, 8, 8, Negro);
     FillRect(newx, newy, 8, 8, Amarillo);
     
     pex=newx;
@@ -233,7 +237,7 @@ void loop() {
     paupdate += parate;
   
     //Jugador uno
-    V_line(p1x, p1y, pa_alt, 0x6400);
+    V_line(p1x, p1y, pa_alt, Negro);
     if(UP1_state){
       p1y-=1;
       }
@@ -242,12 +246,12 @@ void loop() {
       }  
      UP1_state=DO1_state= false;
      if (p1y<17) p1y=17;
-     if (p1y+pa_alt>218) p1y=218-pa_alt;
-     V_line(p1x, p1y, pa_alt, 0x6400);
+     if (p1y+pa_alt>215) p1y=215-pa_alt;
+     V_line(p1x, p1y, pa_alt, Negro);
 
      
     //Jugador dos
-    V_line(p2x, p2y, pa_alt, 0x6400);
+    V_line(p2x, p2y, pa_alt, Negro);
     if(UP2_state){
       p2y-=1;
       }
@@ -256,11 +260,11 @@ void loop() {
       }  
      UP2_state=DO2_state= false;
      if (p2y<17) p2y=17;
-     if (p2y+pa_alt>218) p2y=218-pa_alt;
-     V_line(p2x, p2y, pa_alt, 0x6400);
+     if (p2y+pa_alt>215) p2y=215-pa_alt;
+     V_line(p2x, p2y, pa_alt, Negro);
 
      //Paletas
-    LCD_Bitmap(p1x, p1y,32,32,planta);
+    LCD_Sprite(p1x, p1y, 32, 32, planta, 1, 0, 1,0);;
     LCD_Sprite(p2x, p2y, 32, 32, planta, 1, 0, 1,0);
     
   
@@ -282,30 +286,35 @@ void start_screen(void){ //función de pantalla de inicio
 void fin(){
   juego =false; 
   LCD_Clear(0x00);
-  delay(100);
+  delay(1000);
+  background();
   if(scorej1>scorej2){
-    String text4 = "¡El Jugador 1 es el ganador!";
-    LCD_Print(text4, 100, 100, 1, Azul, 0x00);
+    String text4 = "El Jugador 1 es el ganador!";
+    LCD_Print(text4, 60, 100, 1, Blanco, Azul);
     }
   else{
-    String text5 = "¡El Jugador 2 es el ganador!";
-    LCD_Print(text5, 100, 100, 1, Azul, 0x00);
+    String text5 = "El Jugador 2 es el ganador!";
+    LCD_Print(text5, 60, 100, 1, Blanco, Azul);
     }
-    LCD_Print(String(scorej1), 110, 115, 1, Azul, Blanco);
-    LCD_Print(String(scorej2), 150, 115, 1, Azul, Blanco);
-    background();
+    delay(2500);
+    LCD_Print(String(scorej1), 110, 115, 1, Blanco, Azul);
+    LCD_Print(String(scorej2), 150, 115, 1, Blanco, Azul);
+    delay(1000);
+    
 
-  while (digitalRead(UP1)==LOW && digitalRead(DO1)==LOW && digitalRead(UP2)==LOW && digitalRead(DO2)==LOW){
+   while (digitalRead(UP1)==LOW && digitalRead(DO1)==LOW && digitalRead(UP2)==LOW && digitalRead(DO2)==LOW){
     delay(100);
-  }
-  juego= true;
-  scorej1=scorej2=0;
-  unsigned long start= millis();
-  while(millis()-start<2000);
-  peupdate=millis();
-  paupdate=peupdate;
-  juego= true;
-  reinicio= true;
+    }
+    juego= true;
+    scorej1=scorej2=0;
+    unsigned long start= millis();
+    //LCD_Clear(0x00);
+    while(millis()-start<2000);
+    peupdate=millis();
+    paupdate=peupdate;
+    juego= true;
+    reinicio= true;
+  
   }
   //----------------------------------------------------------------------------------
   void score(){
@@ -331,7 +340,21 @@ void fin(){
     }
   //----------------------------------------------------------------------------------
   void background(){
+   LCD_Clear(0x00);
    FillRect(0, 0, 320, 240, 0x6400);
+
+   for(int x = 0; x <319; x++){
+      LCD_Bitmap(x, 1, 16, 16, tile);
+     
+      LCD_Bitmap(x, 223, 16, 16, tile);
+      x += 15;
+   }
+
+    }
+     //----------------------------------------------------------------------------------
+  void backgroundjuego(){
+   LCD_Clear(0x00);
+   FillRect(0, 0, 320, 240, Negro);
 
    for(int x = 0; x <319; x++){
       LCD_Bitmap(x, 1, 16, 16, tile);
