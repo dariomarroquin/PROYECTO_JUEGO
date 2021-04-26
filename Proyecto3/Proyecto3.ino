@@ -53,13 +53,14 @@ int x_s = 1;
 extern uint8_t inicio[];
 //-------------------------------------------------------------
 
-const int p1x=15;
+const int p1x=17;
 const int p2x=290;
 
 const int pa_alt=23;
 
 int scorej1=0;
 int scorej2=0;
+int maxpuntos=5;
 
 uint8_t p1y= 110;
 uint8_t p2y= 110;
@@ -97,6 +98,9 @@ void LCD_Print(String text, int x, int y, int fontSize, int color, int backgroun
 void start_screen(void);
 //----------------------------------------------------------------------------
 
+void fin(void);
+void background(void);
+void score(void);
 
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
@@ -109,6 +113,7 @@ void setup() {
   pinMode(DO1, INPUT);
   pinMode(UP2, INPUT);
   pinMode(DO2, INPUT);
+  pinMode(PUSH1, INPUT);
   SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
   Serial.begin(9600);
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
@@ -117,29 +122,23 @@ void setup() {
   LCD_Clear(0x00);
 
   start_screen(); //pantalla de inicio
-
+  while(digitalRead(PUSH1)==LOW){
+    delay(5000);
+  }
   
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
   LCD_Print(text1, 70, 110, 2, 0xffff, Negro);
   delay(1000);
-  FillRect(0, 0, 320, 240, 0x6400);
-  String text2 = "MAYAN BALL!";
-  LCD_Print(text2, 70, 110, 2, 0xffff, 0x6400);
-  for(int x = 0; x <319; x++){
-      LCD_Bitmap(x, 1, 16, 16, tile);
+  background();
+  
+  unsigned long start= millis();
+  while(millis()-start<2000);
+  peupdate=millis();
+  paupdate=peupdate;
      
-      LCD_Bitmap(x, 223, 16, 16, tile);
-      x += 15;
-   }
-
-    unsigned long start= millis();
-    while(millis()-start<2000);
-    peupdate=millis();
-    paupdate=peupdate;
-     
-    pex=random(120,125);
-    pey=random(20,30);
+  pex=random(120,125);
+  pey=random(20,30);
   
 }
 //***************************************************************************************************************************************
@@ -177,15 +176,28 @@ void loop() {
     if (newx ==10){  //Extremo izquierdo
       //Se le agrega uno al puntaje de jugador 2
       scorej2++;
+      if (scorej2==maxpuntos){
+        fin();
+        }
+       else{
+        //Show score
+        score();
+        }
       //Música?
-      //Show score
       
       }
     if (newx ==246){ //Extremo derecho
       //Se le agrega uno al puntaje de jugador 1
       scorej1++;
+        if (scorej1==maxpuntos){
+        fin();
+        }
+       else{
+        //Show score
+        score();
+        }
       //Música?
-      //Show score
+      
       }
   //Extremos horizontales 
     if (newy== 17 || newy==217){
@@ -229,7 +241,7 @@ void loop() {
       }  
      UP1_state=DO1_state= false;
      if (p1y<17) p1y=17;
-     if (p1y+pa_alt>220) p1y=220-pa_alt;
+     if (p1y+pa_alt>218) p1y=218-pa_alt;
      V_line(p1x, p1y, pa_alt, 0x6400);
 
      
@@ -243,12 +255,12 @@ void loop() {
       }  
      UP2_state=DO2_state= false;
      if (p2y<17) p2y=17;
-     if (p2y+pa_alt>220) p2y=220-pa_alt;
+     if (p2y+pa_alt>218) p2y=218-pa_alt;
      V_line(p2x, p2y, pa_alt, 0x6400);
 
      //Paletas
-    LCD_Bitmap(p1x, p1y,16,24,planta);
-    LCD_Sprite(p2x, p2y, 16, 24, planta, 1, 0, 1,0);
+    LCD_Bitmap(p1x, p1y,32,32,planta);
+    LCD_Sprite(p2x, p2y, 32, 32, planta, 1, 0, 1,0);
     
   
      
@@ -260,25 +272,13 @@ void loop() {
 //***************************************************************************************************************************************
 //----------------------------------------------------------------------------------
 void start_screen(void){ //función de pantalla de inicio
-  digitalWrite(PC_6, HIGH); //pin para que suene la música de inicio del juego
-  while(end_to_start==0){
-    if(x_s==1){
-      LCD_Bitmap(0, 0, 320, 240, inicio);
-      
-    }
-    x_s = 0;
-    start_btn = digitalRead(PUSH1);
-    
-    if(start_btn == HIGH){ //aquí se lee el botón principal para ver si se inicia el juego o no
-      end_to_start = 1;
-      digitalWrite(PC_6, LOW); //se pone en LOW el pin de la música de inicio
-      setup();
-    }
-  }
+  LCD_Bitmap(0, 0, 320, 240, inicio);
+  delay(2500);
+
 }
 //----------------------------------------------------------------------------------
 
-void GameOver(){
+void fin(){
   juego =false; 
   LCD_Clear(0x00);
   delay(100);
@@ -290,6 +290,9 @@ void GameOver(){
     String text5 = "¡El Jugador 2 es el ganador!";
     LCD_Print(text5, 100, 100, 1, Azul, 0x00);
     }
+    LCD_Print(String(scorej1), 110, 115, 1, Azul, Blanco);
+    LCD_Print(String(scorej2), 150, 115, 1, Azul, Blanco);
+    background();
 
   while (digitalRead(UP1)==LOW && digitalRead(DO1)==LOW && digitalRead(UP2)==LOW && digitalRead(DO2)==LOW){
     delay(100);
@@ -302,8 +305,39 @@ void GameOver(){
   paupdate=peupdate;
   juego= true;
   reinicio= true;
-  
   }
+  //----------------------------------------------------------------------------------
+  void score(){
+    juego= false;
+    LCD_Clear(0x00);
+    delay(100);
+    unsigned long start= millis();
+    background();
+    String text5="Marcador";
+    LCD_Print(text5, 100, 100, 1, 0xFFFF, 0x6400);
+    LCD_Print(String(scorej1), 110, 115, 1, Blanco, Azul);
+    LCD_Print(String(scorej2), 150, 115, 1, Blanco, Azul);
+    while(millis()-start<2000);
+    peupdate=millis();
+    paupdate=peupdate;
+    juego= true;
+    reinicio= true;
+    p1y=100;
+    p2y=100;
+    
+    }
+  //----------------------------------------------------------------------------------
+  void background(){
+   FillRect(0, 0, 320, 240, 0x6400);
+
+   for(int x = 0; x <319; x++){
+      LCD_Bitmap(x, 1, 16, 16, tile);
+     
+      LCD_Bitmap(x, 223, 16, 16, tile);
+      x += 15;
+   }
+
+    }
 //***************************************************************************************************************************************
 // Función para inicializar LCD
 //***************************************************************************************************************************************
