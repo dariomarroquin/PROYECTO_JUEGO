@@ -54,7 +54,7 @@ extern uint8_t inicio[];
 //-------------------------------------------------------------
 
 const int p1x=35;
-const int p2x=250;
+const int p2x=240;
 
 const int pa_alt=23;
 
