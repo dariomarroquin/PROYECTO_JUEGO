@@ -19,7 +19,7 @@
 #include "driverlib/rom.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
-
+#include "sonidos.h"
 #include "bitmaps.h"
 #include "font.h"
 #include "lcd_registers.h"
@@ -43,8 +43,8 @@ int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 //Donde se encontrarán nuestros botones para los jugadores
 const int UP1 = PD_7;
 const int DO1= PF_4;
-const int UP2= PA_3;
-const int DO2= PA_2;
+const int UP2= PC_7;
+const int DO2= PD_6;
 
 //-------------------------------------------------------------
 int end_to_start = 0;
@@ -122,9 +122,9 @@ void setup() {
   LCD_Clear(0x00);
 
   start_screen(); //pantalla de inicio
-  while(digitalRead(PUSH1)==LOW){
-    delay(5000);
-  }
+  //while(digitalRead(PUSH1)==LOW){
+  //  delay(5000);
+  //}
   
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
@@ -186,11 +186,13 @@ void loop() {
         }
        else{
         //Show score
+        musica(melody2, durations2, songLength2);
         score();
         }
       //Música?
-      
+      //musica(melody2, durations2, songLength2);
       }
+      
     if (newx ==255){ //Extremo derecho
       //Se le agrega uno al puntaje de jugador 1
       scorej1++;
@@ -199,11 +201,13 @@ void loop() {
         }
        else{
         //Show score
+        musica(melody3, durations3, songLength3);
         score();
         }
       //Música?
-      
+      //musica(melody3, durations3, songLength3);
       }
+      
   //Extremos horizontales 
     if (newy== 17 || newy==215){
       //Cambiamos de dirección
@@ -214,11 +218,14 @@ void loop() {
    if (newx=p1x  && newy>=p1y && newy<= p1y+ pa_alt){
       coorx=-coorx;
       newx+=coorx+coorx;
+     
     }
+   
    //Jugador 2 le pegó (El de la derecha)
    if (newx=p2x  && newy>=p2y && newy<= p2y+ pa_alt){
       coorx = -coorx;
       newx += coorx+coorx;
+      
   }
     newx=pex+coorx;
     newy=pey+coory;
@@ -278,7 +285,8 @@ void loop() {
 //----------------------------------------------------------------------------------
 void start_screen(void){ //función de pantalla de inicio
   LCD_Bitmap(0, 0, 320, 240, inicio);
-  delay(2500);
+  musica(melody1, durations1, songLength1);
+  delay(100);
 
 }
 //----------------------------------------------------------------------------------
@@ -291,10 +299,12 @@ void fin(){
   if(scorej1>scorej2){
     String text4 = "El Jugador 1 es el ganador!";
     LCD_Print(text4, 60, 100, 1, Blanco, Azul);
+    musica(melody4, durations4, songLength4);
     }
   else{
     String text5 = "El Jugador 2 es el ganador!";
     LCD_Print(text5, 60, 100, 1, Blanco, Azul);
+    musica(melody4, durations4, songLength4);
     }
     delay(2500);
     LCD_Print(String(scorej1), 110, 115, 1, Blanco, Azul);
