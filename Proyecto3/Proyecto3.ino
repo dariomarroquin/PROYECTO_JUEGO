@@ -40,28 +40,30 @@ int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 #define Azul   0x001F
 #define Rojo   0xF800
 #define Amarillo 0xFFE0
+
 //Donde se encontrarán nuestros botones para los jugadores
 const int UP1 = PD_7;
 const int DO1= PF_4;
 const int UP2= PC_7;
 const int DO2= PD_6;
 
-//-------------------------------------------------------------
-int end_to_start = 0;
-int start_btn;
-int x_s = 1;
 extern uint8_t inicio[];
-//-------------------------------------------------------------
 
+//Posiciones iniciales para los jugadores en x
 const int p1x=35;
 const int p2x=240;
 
 const int pa_alt=23;
 
+//Variables para vel el puntaje y como corre el juego
 int scorej1=0;
 int scorej2=0;
 int maxpuntos=5;
+int end_to_start = 0;
+int start_btn;
+int x_s = 1;
 
+//Valores iniciales para los jugadores y la pelota 
 uint8_t p1y= 110;
 uint8_t p2y= 110;
 uint8_t pex=64;
@@ -92,14 +94,14 @@ void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsign
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
 
-
-//----------------------------------------------------------------------------
-//función para pantalla de inicio
+//Función para pantalla de inicio
 void start_screen(void);
-//----------------------------------------------------------------------------
-
+//Fución para finalizar el juego
 void fin(void);
+//Dibujar el background
 void background(void);
+void backgroundjuego(void);
+//Enseñar puntaje
 void score(void);
 
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
@@ -109,23 +111,23 @@ void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int 
 // Inicialización
 //***************************************************************************************************************************************
 void setup() {
+  //Los botones para los jugadores se definen como inputs
   pinMode(UP1, INPUT);
   pinMode(DO1, INPUT);
   pinMode(UP2, INPUT);
   pinMode(DO2, INPUT);
   pinMode(PUSH1, INPUT);
+
+  //Se configura para que corra la pantalla
   SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
   Serial.begin(9600);
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
   Serial.println("Inicio");
   LCD_Init();
   LCD_Clear(0x00);
-
-  start_screen(); //pantalla de inicio
-  //while(digitalRead(PUSH1)==LOW){
-  //  delay(5000);
-  //}
-  
+  //Función para la pantalla de inicio
+  start_screen(); 
+  //Enseñamos la pantalla de bienvenida con instrucciones
   FillRect(0, 0, 320, 240, Negro);
   String text1 = "Bienvenidos!";
   LCD_Print(text1, 60, 100, 2, 0xffff, Negro);
@@ -135,12 +137,14 @@ void setup() {
   LCD_Print(text3, 30, 150, 2, 0xffff, Negro);
   delay(2000);
   backgroundjuego();
-  
+
+
+  //Esperamos un tiempo para empezar el movimiento de la pelota
   unsigned long start= millis();
   while(millis()-start<2000);
   peupdate=millis();
   paupdate=peupdate;
-     
+  //Se escogen unas coordenadas random para ver la posición de la pelota 
   pex=random(120,125);
   pey=random(20,30);
   
@@ -150,6 +154,7 @@ void setup() {
 //***************************************************************************************************************************************
 void loop() {
   unsigned long time= millis();
+  //Definimos de esta manera el digitalRead de los botones para que sea más fácil ver si se presiono el botón 
   static bool UP1_state=false;
   static bool DO1_state=false;
   static bool UP2_state=false;
@@ -158,7 +163,7 @@ void loop() {
   DO1_state |= (digitalRead(DO1)==LOW);
   UP2_state |= (digitalRead(UP2)==LOW);
   DO2_state |= (digitalRead(DO2)==LOW);
-  
+  //Si se reinicio, la pelota empieza desde coordenadas random y se dibuja el background
   if(reinicio){
     backgroundjuego();
     pex=random(120,125);
@@ -173,10 +178,11 @@ void loop() {
       while(coory==0);
       reinicio=false;
     }
+  //El movmiento de la pelota se realiza al sumar un valor random a la coordenada que ya se tenía
   if(time > peupdate && juego){
     uint8_t newx=pex+coorx;
     uint8_t newy=pey+coory;
-    
+    //Definimos algunas condiciones para el movimiento
     //Extremos verticales
     if (newx ==10){  //Extremo izquierdo
       //Se le agrega uno al puntaje de jugador 2
@@ -189,7 +195,7 @@ void loop() {
         musica(melody2, durations2, songLength2);
         score();
         }
-      //Música?
+      //Música
       //musica(melody2, durations2, songLength2);
       }
       
@@ -204,7 +210,7 @@ void loop() {
         musica(melody3, durations3, songLength3);
         score();
         }
-      //Música?
+      //Música
       //musica(melody3, durations3, songLength3);
       }
       
@@ -227,6 +233,7 @@ void loop() {
       newx += coorx+coorx;
       
   }
+  //Hacemos suma para que se dé el movimiento
     newx=pex+coorx;
     newy=pey+coory;
     FillRect(pex, pey, 8, 8, Negro);
@@ -235,11 +242,8 @@ void loop() {
     pex=newx;
     pey=newy;
     peupdate += perate;
-
-
   }
-
-  //Paletas 
+ //Ahora definimos como se veran las raquetas de los jugadores y su movimiento 
   if (time> paupdate && juego){
     paupdate += parate;
   
@@ -270,7 +274,7 @@ void loop() {
      if (p2y+pa_alt>215) p2y=215-pa_alt;
      V_line(p2x, p2y, pa_alt, Negro);
 
-     //Paletas
+     //Paletas de los jugadores con su movimiento
     LCD_Sprite(p1x, p1y, 32, 32, planta, 1, 0, 1,0);;
     LCD_Sprite(p2x, p2y, 32, 32, planta, 1, 0, 1,0);
     
@@ -283,14 +287,15 @@ void loop() {
 // Funciones
 //***************************************************************************************************************************************
 //----------------------------------------------------------------------------------
-void start_screen(void){ //función de pantalla de inicio
+//Función de pantalla de inicio
+void start_screen(void){ 
   LCD_Bitmap(0, 0, 320, 240, inicio);
   musica(melody1, durations1, songLength1);
   delay(100);
 
 }
 //----------------------------------------------------------------------------------
-
+//Game Over al llegar a ciertos puntos
 void fin(){
   juego =false; 
   LCD_Clear(0x00);
@@ -327,6 +332,7 @@ void fin(){
   
   }
   //----------------------------------------------------------------------------------
+  //Función para enseñar el puntaje 
   void score(){
     juego= false;
     LCD_Clear(0x00);
@@ -349,6 +355,7 @@ void fin(){
     
     }
   //----------------------------------------------------------------------------------
+  //Función de background
   void background(){
    LCD_Clear(0x00);
    FillRect(0, 0, 320, 240, 0x6400);
@@ -361,7 +368,8 @@ void fin(){
    }
 
     }
-     //----------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------
+  //Función de background para el juego
   void backgroundjuego(){
    LCD_Clear(0x00);
    FillRect(0, 0, 320, 240, Negro);
