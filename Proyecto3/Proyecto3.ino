@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <TM4C123GH6PM.h>
+#include <SPI.h>
+#include <SD.h>
+#include <stdlib.h>
+#include <string.h>
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
@@ -48,6 +52,12 @@ const int UP2= PC_7;
 const int DO2= PD_6;
 
 extern uint8_t inicio[];
+
+//Variables para SD
+int Num = 0;
+File file;
+unsigned char*tile;
+
 
 //Posiciones iniciales para los jugadores en x
 const int p1x=35;
@@ -94,6 +104,9 @@ void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsign
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
 
+//Función para sd
+void setupsd(void);
+
 //Función para pantalla de inicio
 void start_screen(void);
 //Fución para finalizar el juego
@@ -125,6 +138,9 @@ void setup() {
   Serial.println("Inicio");
   LCD_Init();
   LCD_Clear(0x00);
+  //Función para sd
+  setupsd();
+  tile = opensd();
   //Función para la pantalla de inicio
   start_screen(); 
   //Enseñamos la pantalla de bienvenida con instrucciones
@@ -136,7 +152,7 @@ void setup() {
   String text3 = "llegue a 5 gana! ";
   LCD_Print(text3, 30, 150, 2, 0xffff, Negro);
   delay(2000);
-  backgroundjuego();
+  backgroundjuego(tile);
 
 
   //Esperamos un tiempo para empezar el movimiento de la pelota
@@ -165,7 +181,7 @@ void loop() {
   DO2_state |= (digitalRead(DO2)==LOW);
   //Si se reinicio, la pelota empieza desde coordenadas random y se dibuja el background
   if(reinicio){
-    backgroundjuego();
+    backgroundjuego(tile);
     pex=random(120,125);
     pey=random(20,30);
     do{
@@ -287,6 +303,49 @@ void loop() {
 // Funciones
 //***************************************************************************************************************************************
 //----------------------------------------------------------------------------------
+//Setup SPI SD
+void setupsd(void){
+  SPI.setModule(0);
+
+  Serial.println(" ");
+  Serial.println("Initializing SD card...");
+  pinMode(PA_3, OUTPUT);
+
+  if (!SD.begin(PA_3)) {
+    Serial.println("initialization failed!");
+    return;
+  }
+}
+
+//----------------------------------------------------------------------------------
+//Funcion SD
+unsigned char* opensd(){
+  file = SD.open("bandas.txt"); //abrir archivos
+  
+  Serial.println("");
+  Serial.println("-----------------------------------------------------");
+  Serial.println("Vamos a ver");
+  Serial.println("-----------------------------------------------------");
+  char data[file.size()];
+  file.read(data, file.size());
+  file.close();
+
+  unsigned char* temp_data = (unsigned char*)malloc(16*16*2*sizeof(unsigned char));
+
+  const char s1[2] = ",";
+
+  temp_data[0] = strtoul(strtok(data,s1), NULL, 16);
+
+  for (int i = 1; i<(16*16*2); i++){
+    temp_data[i] = strtoul(strtok(NULL,s1), NULL,16);
+  }
+  return temp_data;
+
+}
+
+
+
+//----------------------------------------------------------------------------------
 //Función de pantalla de inicio
 void start_screen(void){ 
   LCD_Bitmap(0, 0, 320, 240, inicio);
@@ -300,7 +359,7 @@ void fin(){
   juego =false; 
   LCD_Clear(0x00);
   delay(1000);
-  background();
+  background(tile);
   if(scorej1>scorej2){
     String text4 = "El Jugador 1 es el ganador!";
     LCD_Print(text4, 60, 100, 1, Blanco, Azul);
@@ -338,7 +397,7 @@ void fin(){
     LCD_Clear(0x00);
     delay(100);
     unsigned long start= millis();
-    background();
+    background(tile);
     String text5="Marcador";
     LCD_Print(text5, 100, 100, 1, 0xFFFF, 0x6400);
     LCD_Print(String(scorej1), 110, 115, 1, Blanco, Azul);
@@ -356,7 +415,7 @@ void fin(){
     }
   //----------------------------------------------------------------------------------
   //Función de background
-  void background(){
+  void background(unsigned char tile[]){
    LCD_Clear(0x00);
    FillRect(0, 0, 320, 240, 0x6400);
 
@@ -370,7 +429,7 @@ void fin(){
     }
   //----------------------------------------------------------------------------------
   //Función de background para el juego
-  void backgroundjuego(){
+  void backgroundjuego(unsigned char tile[]){
    LCD_Clear(0x00);
    FillRect(0, 0, 320, 240, Negro);
 
