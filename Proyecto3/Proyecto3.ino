@@ -1,4 +1,13 @@
 //***************************************************************************************************************************************
+/*Dario Marroquín, Carnet 18269
+Alejandra Samayoa, Carnet 18064
+Para la clase de Electronica Digital II
+
+Video juego a base del juego clásico PONG, utilizando la TIVA-C y la pantalla ILI934
+*********************SUPER MAYAN BALL**********************************************
+ */
+//***************************************************************************************************************************************
+//***************************************************************************************************************************************
 /* Librería para el uso de la pantalla ILI9341 en modo 8 bits
  * Basado en el código de martinayotte - https://www.stm32duino.com/viewtopic.php?t=637
  * Adaptación, migración y creación de nuevas funciones: Pablo Mazariegos y José Morales
@@ -303,7 +312,7 @@ void loop() {
 // Funciones
 //***************************************************************************************************************************************
 //----------------------------------------------------------------------------------
-//Setup SPI SD
+//Setup SPI SD para que se pueda leer la misma
 void setupsd(void){
   SPI.setModule(0);
 
@@ -318,7 +327,7 @@ void setupsd(void){
 }
 
 //----------------------------------------------------------------------------------
-//Funcion SD
+//Funcion SD, se leen los elementos del background desde la SD
 unsigned char* opensd(){
   file = SD.open("bandas.txt"); //abrir archivos
   
